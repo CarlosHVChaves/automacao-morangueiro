@@ -7,7 +7,7 @@ class bomba:
         pass
 
     def __init__(self):
-        self.board = pyfirmata.Arduino('COM3')
+        self.board = pyfirmata.Arduino('/dev/ttyACM0')
         self.tempo = 0
         self.porta = 0
 
