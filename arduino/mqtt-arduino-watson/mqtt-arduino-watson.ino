@@ -48,7 +48,15 @@ IPAddress server(169, 62, 202, 130); // "mc6re7.messaging.internetofthings.ibmcl
 
 PubSubClient mqttClient(ethClient);
 
-
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i=0;i<length;i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+}
 void setup()
 {
     // Open serial communications and wait for port to open:
@@ -67,13 +75,19 @@ void setup()
   delay(1500);
 
   mqttClient.setServer(server, 1883);
-
+  mqttClient.setCallback(callback);
   if (mqttClient.connect("d:mc6re7:arduino:a2560", "use-token-auth", "12345678")) {
     // connection succeeded
     Serial.println("Connected ");
     // boolean r= mqttClient.subscribe("test");
     // Serial.println("subscribe ");
     // Serial.println(r);
+    if (mqttClient.subscribe("iot-2/cmd/ligar_bomba/fmt/json")) {
+      Serial.println("Inscrito no tópico"); 
+    } 
+    else {
+      Serial.println("Falha ao se conectar no tópico");
+    }
   } 
   else {
     // connection failed
@@ -81,7 +95,6 @@ void setup()
     // on why it failed.
     Serial.println("Connection failed ");
   }
-
 }
 
 void loop()
@@ -185,7 +198,6 @@ void loop()
     char buffer[256];
     size_t n = serializeJson(doc, buffer);
     mqttClient.publish("iot-2/evt/telemetria/fmt/json", buffer, n);
-    mqttClient.setCallback(callback);
     // Serial.println(json);
     // Serial.println("{\temperatura_ar
     // boolean rc = mqttClient.publish("iot-2/evt/telemetria/fmt/json","{\"temperatura ambiente\":\"20\"}");
@@ -195,13 +207,4 @@ void loop()
     delay(1000); //wait
     mqttClient.loop(); //call loop
   }
-}
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i=0;i<length;i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
 }
