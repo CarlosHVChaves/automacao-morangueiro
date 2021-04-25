@@ -3,9 +3,9 @@
 #include <PubSubClient.h>
 #include <string.h>
 #include <ArduinoJson.h>
-//#include <MQTTClient.h>
-//#include <IPStack.h>
-//#include <Countdown.h>
+// #include <MQTTClient.h>
+// #include <IPStack.h>
+// #include <Countdown.h>
 
 //Inclusão de biblioteca para leitura do sensor DHT11
 #include "DHT.h"
@@ -167,7 +167,8 @@ void loop()
     DynamicJsonDocument doc ( 1024 );
     doc [ "temperatura_ambiente" ] = temperatura_ambiente ;
     doc [ "umidade_ambiente" ] = umidade_ambiente ;
-    doc [ "status_umidade_solo" ] = status_solo ;
+    doc [ "valor_sensor_umidade_solo" ] = valor_analogico_sensor_umidade_solo;
+    doc [ "status_umidade_solo" ] = status_solo ;  
 
     serializeJson (doc, Serial);
     // serializeJson(doc, monta_json);
@@ -184,7 +185,7 @@ void loop()
     char buffer[256];
     size_t n = serializeJson(doc, buffer);
     mqttClient.publish("iot-2/evt/telemetria/fmt/json", buffer, n);
-    
+    mqttClient.setCallback(callback);
     // Serial.println(json);
     // Serial.println("{\temperatura_ar
     // boolean rc = mqttClient.publish("iot-2/evt/telemetria/fmt/json","{\"temperatura ambiente\":\"20\"}");
@@ -194,4 +195,13 @@ void loop()
     delay(1000); //wait
     mqttClient.loop(); //call loop
   }
+}
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i=0;i<length;i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
 }
